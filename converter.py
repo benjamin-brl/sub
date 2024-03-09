@@ -24,7 +24,12 @@ class Convert():
         """
         try:
             logger.info(f"Convertit le code couleur \"{color}\"")
-            return f"#{color[6:8]}{color[4:6]}{color[2:4]}"
+            if len(color) == 4:
+                return f"{color[2:4]}"
+            elif len(color) == 9:
+                return f"#{color[6:8]}{color[4:6]}{color[2:4]}"
+            elif len(color) == 10:
+                return f"#{color[6:8]}{color[4:6]}{color[2:4]}{color[8:10]}"
         except Exception as e:
             logger.error(f"Il y a eu une erreur inattendu lors de la conversion de la couleur {color} | {e}")
 
@@ -47,7 +52,15 @@ class Convert():
         """
         try:
             logger.info(f"Convertit le code couleur \"{color}\"")
-            return f"&H{color[5:7]}{color[3:5]}{color[1:3]}&"
+            if len(color) == 2:
+                return f"&H{color}"
+            elif len(color) == 7:
+                return f"&H{color[5:7]}{color[3:5]}{color[1:3]}&"
+            elif len(color) == 9:
+                return f"&H{color[5:7]}{color[3:5]}{color[1:3]}{color[7:9]}"
+            else:
+                return None
+
         except Exception as e:
             logger.error(f"Il y a eu une erreur inattendu lors de la conversion de la couleur {color} | {e}")
 
@@ -99,6 +112,18 @@ class Convert():
     # * WORK : Fonctionne parfaitement
     @staticmethod
     def time2ASStc(timecode:str)->str:
+        """Convertit le timecode "standard" en un timecode ASS
+
+        Args:
+            ```py
+            timecode (str): Timecode standard
+            ```
+
+        Returns:
+            ```py
+            str: Timecode ASS
+            ```
+        """
         try:
             hms, ms = timecode.split('.', 1)
             h, m, s = hms.split(':', 2)
@@ -457,3 +482,6 @@ class Convert():
                 f.write(buildEvents())
         except Exception as e:
             logger.error(f'Une erreur inattendu est survenu | {e}')
+
+if __name__ =="__main__":
+    pass

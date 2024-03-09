@@ -114,45 +114,6 @@ class Sub:
             logger.error(f"Erreur inattendu | {e}")
 
     # * WORK : Fonctionne parfaitement
-    # TODO : Ajouté des informations complémentaires
-    def getBasicInfo(self, sub:str, Parts:dict , at:dict = {})->dict[str, str | int | list[str | int] | dict[str, float]]:
-        """Récupère les informations basique du sous-titre
-
-        Args:
-            ```py
-            sub (str): Chemin du sous-titre
-            at (dict[str, str | int | list[str | int]]): Si un dictionnaire contenant des informations du script à déjà été créé
-            ```
-
-        Returns:
-            ```py
-            dict[str, str | int | list[str | int] | dict[str, float]]: Dictionnaire contenant les informations basiques du script
-            ```
-            
-        ```json
-        {
-            "name" : "test",
-            "type" : "ass",
-            "countOfLine" : 150,
-            "weight" : 2184576,
-            ...
-        }
-        ```
-        """
-        try:
-            name, ext = os.path.splitext(os.path.basename(sub))
-            at["name"] = name
-            at["extension"] = ext
-            at["weight"] = os.path.getsize(sub)
-            at["countOfLineScriptInfo"] = len(Parts["Script Info"])
-            at["countOfDifferentStyles"] = len(Parts["Styles"])
-            at["countOfLineDialogue"] = len(Parts["Events"])
-            at["lang"] = self.getGlobalLangsOfDialogue(Parts["Events"])
-            return at
-        except Exception as e :
-            logger.error(f'Une erreur inattendu est survenu | {e}')
-
-    # * WORK : Fonctionne parfaitement
     # TODO : Ajouté des informations complémentaires et traité les autres cas de figure
     def getSubInfos(self, sub:str)->dict[str, str | int | list[str | int] | dict[str, float]]:
         """Créer un tableau associatif entre le sous-titre chargé et ces différentes valeurs
@@ -176,9 +137,50 @@ class Sub:
         }
         ```
         """
+
+        # * WORK : Fonctionne parfaitement
+        # TODO : Ajouté des informations complémentaires
+        def getBasicInfo(sub:str, Parts:dict)->dict[str, str | int | list[str | int] | dict[str, float]]:
+            """Récupère les informations basique du sous-titre
+
+            Args:
+                ```py
+                sub (str): Chemin du sous-titre
+                at (dict[str, str | int | list[str | int]]): Si un dictionnaire contenant des informations du script à déjà été créé
+                ```
+
+            Returns:
+                ```py
+                dict[str, str | int | list[str | int] | dict[str, float]]: Dictionnaire contenant les informations basiques du script
+                ```
+                
+            ```json
+            {
+                "name" : "test",
+                "type" : "ass",
+                "countOfLine" : 150,
+                "weight" : 2184576,
+                ...
+            }
+            ```
+            """
+            try:
+                at = {}
+                name, ext = os.path.splitext(os.path.basename(sub))
+                at["name"] = name
+                at["extension"] = ext
+                at["weight"] = os.path.getsize(sub)
+                at["countOfLineScriptInfo"] = len(Parts["Script Info"])
+                at["countOfDifferentStyles"] = len(Parts["Styles"])
+                at["countOfLineDialogue"] = len(Parts["Events"])
+                at["lang"] = self.getGlobalLangsOfDialogue(Parts["Events"])
+                return at
+            except Exception as e :
+                logger.error(f'Une erreur inattendu est survenu | {e}')
+
         try:
             Parts = self.getParts(sub)
-            at = self.getBasicInfo(sub, Parts)
+            at = getBasicInfo(sub, Parts)
             match at["extension"]:
                 case '.ass':
                     at["type"] = "Advanced SubStation Alpha"
@@ -212,6 +214,38 @@ class Sub:
         }
         ``` 
         """
+
+        # * WORK : Fonctionne parfaitement
+        def getLangsOfLine(line:str)->dict[str, float]:
+            """Récupère les langues présente dans une ligne et leur taux d'implication
+
+            Args:
+                ```py
+                line (str): Ligne de dialogue
+                ```
+
+            Returns:
+                ```py
+                dict[str, float]: langues présente dans la ligne et leur taux d'implication
+                ```
+            
+            ```json
+            {
+                "fr": 0.456,
+                "en": 0.125,
+                "jp": 0.257,
+                "es": 0.162
+            }
+            ```
+            """
+            try:
+                langues:dict[str, float] = {}
+                for langue in detect_langs(line):
+                    langues[langue.lang] = round(langue.prob,3)
+                return {langue: prob for langue, prob in langues.items() if prob >= 0.01}
+            except Exception as e :
+                logger.error(f'Une erreur inattendu est survenu pour la ligne "{line}" | {e}')
+        
         try:
             langues = {}
             total_lignes = len(Events.keys())
@@ -219,7 +253,7 @@ class Sub:
                 line = Events[i]["Text"].replace("\\N", " ")
                 logger.info(f'La ligne "{line}" est en cours de traitement')
                 try:
-                    langues_ligne = self.getLangsOfLine(line)
+                    langues_ligne = getLangsOfLine(line)
                     for langue, prob in langues_ligne.items():
                         langues[langue] = round(langues.get(langue, 0) + (prob / total_lignes), 3)
                 except Exception as e:
@@ -228,37 +262,6 @@ class Sub:
             return {langue: prob for langue, prob in langues.items() if prob >= 0.03}
         except Exception as e:
             logger.error(f'Une erreur inattendu est survenu | {e}')
-
-    # * WORK : Fonctionne parfaitement
-    def getLangsOfLine(self, line:str)->dict[str, float]:
-        """Récupère les langues présente dans une ligne et leur taux d'implication
-
-        Args:
-            ```py
-            line (str): Ligne de dialogue
-            ```
-
-        Returns:
-            ```py
-            dict[str, float]: langues présente dans la ligne et leur taux d'implication
-            ```
-        
-        ```json
-        {
-            "fr": 0.456,
-            "en": 0.125,
-            "jp": 0.257,
-            "es": 0.162
-        }
-        ```
-        """
-        try:
-            langues:dict[str, float] = {}
-            for langue in detect_langs(line):
-                langues[langue.lang] = round(langue.prob,3)
-            return {langue: prob for langue, prob in langues.items() if prob >= 0.01}
-        except Exception as e :
-            logger.error(f'Une erreur inattendu est survenu pour la ligne "{line}" | {e}')
 
     # * WORK : Fonctionne parfaitement
     def getParts(self, sub:str)->dict[str, dict[str, str | dict[str, str]]]:
@@ -647,8 +650,7 @@ def main():
     """Fonction principal qui va faire le processus de conversion"""
     try:
         SousTitre = Sub()
-        SousTitre.getSubs()
-        for sub in SousTitre.subs:
+        for sub in SousTitre.getSubs():
             infos = SousTitre.getSubInfos(sub)
             json.dump(infos, open(f'{SousTitre.title}.json', 'w'), indent=4)
             Convert.toSRT(infos["parts"], "./", SousTitre.title)
