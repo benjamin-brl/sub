@@ -39,7 +39,7 @@ import sys, re, os, json
 from pprint import pprint
 from dataclasses import dataclass
 
-from converter import Convert
+from Converter.converter import Convert
 
 from loguru import logger
 from tkinter import filedialog
