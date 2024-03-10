@@ -20,7 +20,13 @@
     </tbody>
 </table>
 
-## What I need for use Sub ?
+# Installation
+## With pip
+```sh
+pip install submodule
+```
+
+## Manually
 You need tkinter and langdetect. For this, either use this :
 ```sh
 pip install -r requirements.txt

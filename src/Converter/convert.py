@@ -7,7 +7,7 @@ class Convert():
 
     # * WORK : Fonctionne parfaitement
     @staticmethod
-    def ASScolor2Hex(color:str)->str:
+    def ASS_color_to_hex_color(color:str)->str:
         """Convertit le formatage de couleur ASS vers Hexadecimal
 
         Args:
@@ -35,7 +35,7 @@ class Convert():
 
     # * WORK : Fonctionne parfaitement
     @staticmethod
-    def HexColor2ASS(color:str)->str:
+    def hex_color_to_ASS_color(color:str)->str:
         """Convertit le formatage de couleur Hexadecimal vers ASS
 
         Args:
@@ -66,8 +66,8 @@ class Convert():
 
     # * WORK : Fonctionne parfaitement
     @staticmethod
-    def ASStc2time(timecode:str)->str:
-        """Convertit un timecode au format ASS vers un format time
+    def ASS_timecode_to_standard_timecode(timecode:str)->str:
+        """Convertit un timecode au format ASS vers un format standard
 
         Args:
             ```py
@@ -80,16 +80,37 @@ class Convert():
             ```
         """
         try:
-            logger.info(f"Convertit le timecode \"{timecode}\"")
+            logger.info(f"Convertit le timecode ASS \"{timecode}\" au format standard")
             h, m, s = timecode.split(':', 3)
-            s, cs = s.split('.', 1)
-            return f"{h:02}:{m}:{s}.{cs}0"
+            return f"{h.zfill(2)}:{m}:{s}0"
         except Exception as e:
             logger.error(f"Il y a eu une erreur inattendu lors de la conversion du timecode {timecode} | {e}")
 
     # * WORK : Fonctionne parfaitement
     @staticmethod
-    def time2SRTtc(timecode:str)->str:
+    def SRT_timecode_to_standard_timecode(timecode:str)->str:
+        """Convertit un timecode au format SRT vers un format standard
+
+        Args:
+            ```py
+            timecode (str): timecode d'entrée
+            ```
+
+        Returns:
+            ```py
+            time: timecode au format standard pour une harmonisation du format
+            ```
+        """
+        try:
+            logger.info(f"Convertit le timecode SRT \"{timecode}\" au format standard")
+            hms, ms = timecode.split(',', 1)
+            return f"{hms}.{ms}"
+        except Exception as e:
+            logger.error(f"Il y a eu une erreur inattendu lors de la conversion du timecode {timecode} | {e}")
+
+    # * WORK : Fonctionne parfaitement
+    @staticmethod
+    def standard_timecode_to_SRT_timecode(timecode:str)->str:
         """Convertit le formatage de timecode ASS vers timecode SRT
 
         Args:
@@ -103,7 +124,7 @@ class Convert():
             ```
         """
         try:
-            logger.info(f"Convertit le timecode \"{timecode}\"")
+            logger.info(f"Convertit le timecode standard \"{timecode}\" au format SRT")
             hms, ms = timecode.split('.', 1)
             return f"{hms},{ms}"
         except Exception as e:
@@ -111,7 +132,7 @@ class Convert():
 
     # * WORK : Fonctionne parfaitement
     @staticmethod
-    def time2ASStc(timecode:str)->str:
+    def standard_timecode_to_ASS_timecode(timecode:str)->str:
         """Convertit le timecode "standard" en un timecode ASS
 
         Args:
@@ -125,18 +146,18 @@ class Convert():
             ```
         """
         try:
+            logger.info(f"Convertit le timecode standard \"{timecode}\" au format ASS")
             hms, ms = timecode.split('.', 1)
             h, m, s = hms.split(':', 2)
-            if h[1:] == '0':
-                return f'{h[:1]}:{m}:{s}.{ms[:1]}'
+            if h[0] == '0':
+                return f'{h[1]}:{m}:{s}.{ms[:2]}'
             else:
-                return f'{h}:{m}:{s}.{ms[:1]}'
+                return f'{h}:{m}:{s}.{ms[:2]}'
         except Exception as e:
             logger.error(f'Une erreur inattendu est survenu | {e}')
 
-    # * WORK : Fonctionne parfaitement
     @staticmethod
-    def getTagsInUse(Events:dict, Styles:dict, i:int)->dict[str, str | int]:
+    def get_tags_use(Events:dict, Styles:dict, i:int)->dict[str, str | int]:
             """Construit le tableau des balises en utilisations dans le dialogue en cours de traitement
 
             Args:
@@ -208,9 +229,8 @@ class Convert():
             except Exception as e:
                 logger.error(f'Une erreur inattendue est survenue | {e}')
 
-    # * WORK : Fonctionne parfaitement
     @staticmethod
-    def toSRT(Parts:dict, dir:str, title:str)->None:
+    def to_SRT(Parts:dict, dir:str, title:str)->None:
         """Convertit les infos du sous-titre chargé vers un format SRT
 
         Args:
@@ -231,10 +251,10 @@ class Convert():
             """
             try:
                 haveTag = False
-                Tags = Convert.getTagsInUse(Events, Styles, i)
+                Tags = Convert.get_tags_use(Events, Styles, i)
 
                 text = f"{i}\n"
-                text += f"{Convert.time2SRTtc(Events[i]['Start'])} --> {Convert.time2SRTtc(Events[i]['End'])} "
+                text += f"{Convert.standard_timecode_to_SRT_timecode(Events[i]['Start'])} --> {Convert.standard_timecode_to_SRT_timecode(Events[i]['End'])} "
 
                 if 'pos' in Tags:
                     pos = Events[i]['Tags']['pos']
@@ -297,9 +317,8 @@ class Convert():
         except Exception as e :
             logger.error(f'Une erreur inattendu est survenu | {e}')
 
-    # * WORK : Fonctionne parfaitement
     @staticmethod
-    def toASS(Parts:dict, dir:str, title:str, dim:str)->None:
+    def to_ASS(Parts:dict, dir:str, title:str, dim:str)->None:
         """Convertit les infos du sous-titre chargé vers un format ASS
 
         Args:
@@ -369,7 +388,7 @@ class Convert():
                 try:
                     if not t:
                         try:
-                            Tags = Convert.getTagsInUse(Events, Styles, i)
+                            Tags = Convert.get_tags_use(Events, Styles, i)
                             print(Tags)
                             if Tags:
                                 balise = '{'
@@ -398,7 +417,7 @@ class Convert():
 
                                     else:
                                         val = Events[i]['Tags']['c']
-                                        balise += f'\\{tag}{Convert.HexColor2ASS(val)}'
+                                        balise += f'\\{tag}{Convert.Hex_color_to_ASS_color(val)}'
                             
                                 return balise + '}'
                             
@@ -415,7 +434,7 @@ class Convert():
                                 for tag in Tags:
                                     if not isinstance(Tags[tag], list) or not isinstance(Tags[tag], dict):
                                         if tag in ['c', '1c', '2c', '3c', '4c']:
-                                            balise += f'\\{tag}{Convert.HexColor2ASS(Convert, Tags[tag])}'
+                                            balise += f'\\{tag}{Convert.Hex_color_to_ASS_color(Convert, Tags[tag])}'
                                         else:
                                             balise += f'\\{tag}{Tags[tag]}'
 
@@ -460,7 +479,7 @@ class Convert():
                         if info != 'Text':
 
                             if info == 'Start' or info == 'End':
-                                dialogues += f'{Convert.time2ASStc(Events[i][info])},'
+                                dialogues += f'{Convert.standard_timecode_to_ASS_timecode(Events[i][info])},'
 
                             else:
                                 dialogues += f'{Events[i][info]},'
@@ -482,6 +501,3 @@ class Convert():
                 f.write(buildEvents())
         except Exception as e:
             logger.error(f'Une erreur inattendu est survenu | {e}')
-
-if __name__ =="__main__":
-    pass
