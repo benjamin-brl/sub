@@ -3,7 +3,7 @@ from src.Sub.sub import Sub
 
 Subtitle = Sub()
 
-ASS_TEST = 'C:/Users/Im4g1/Documents/Cours/Mini_Projet/SUBMODULE/tests/test.ass'
+ASS_TEST = 'C:/Users/Im4g1/Documents/Cours/Mini_Projet/SUBMODULE/doc/test.ass'
 
 SCRIPT_INFO_TEST = {
     "Title": "Default Aegisub file",

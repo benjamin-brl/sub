@@ -4,4 +4,5 @@ __pycache__
 *.mp4
 *.json
 *.bat
+*.log
 main.py

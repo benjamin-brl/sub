@@ -13,6 +13,9 @@ class TestConvert(unittest.TestCase):
 		self.assertEqual(Convert.hex_color_to_ASS_color('#RRGGBB'), '&HBBGGRR&')
 		self.assertEqual(Convert.hex_color_to_ASS_color('#RRGGBBAA'), '&HBBGGRRAA')
 
+	def test_hex_RGBA_to_hex_RGB(self):
+		self.assertEqual(Convert.hex_RGBA_to_hex_RGB('#RRGGBBAA'), '#RRGGBB')
+
 	def test_ASS_timecode_to_standard_timecode(self):
 		self.assertEqual(Convert.ASS_timecode_to_standard_timecode('1:56:47.28'), '01:56:47.280')
 		self.assertEqual(Convert.ASS_timecode_to_standard_timecode('12:30:21.45'), '12:30:21.450')
@@ -28,5 +31,41 @@ class TestConvert(unittest.TestCase):
 	def test_standard_timecode_to_SRT_timecode(self):
 		self.assertEqual(Convert.standard_timecode_to_SRT_timecode('01:56:47.280'), '01:56:47,280')
 		self.assertEqual(Convert.standard_timecode_to_SRT_timecode('12:30:21.450'), '12:30:21,450')
+
+	def test_to_good_type(self):
+		# Digit
+		self.assertEqual(Convert.to_good_type('1'), 1)
+		self.assertEqual(Convert.to_good_type('-1'), -1)
+
+		# Alpha
+		self.assertEqual(Convert.to_good_type('chaîne'), 'chaîne')
+
+		# Float
+		self.assertEqual(Convert.to_good_type('1.1'), 1.1)
+
+		# List of alpha
+		self.assertEqual(Convert.to_good_type(['list']), ['list'])
+
+		# List of digit
+		self.assertEqual(Convert.to_good_type(['1']), [1])
+		self.assertEqual(Convert.to_good_type(['-1']), [-1])
+
+		# List of float
+		self.assertEqual(Convert.to_good_type(['1.1']), [1.1])
+
+		# Dict of alpha
+		self.assertEqual(Convert.to_good_type({'key':'value'}), {'key':'value'})
+
+		# Dict of digit
+		self.assertEqual(Convert.to_good_type({'key':'1'}), {'key':1})
+		self.assertEqual(Convert.to_good_type({'key':'-1'}), {'key':-1})
+
+		# Dict of float
+		self.assertEqual(Convert.to_good_type({'key':'1.1'}), {'key':1.1})
+
+		# Dict of list
+		self.assertEqual(Convert.to_good_type({'key':['list']}), {'key':['list']})
+		self.assertEqual(Convert.to_good_type({'key':['1']}), {'key':[1]})
+		self.assertEqual(Convert.to_good_type({'key':['-1']}), {'key':[-1]})
 
 unittest.main()

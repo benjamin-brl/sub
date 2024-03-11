@@ -47,6 +47,7 @@ from langdetect import detect_langs, DetectorFactory
 
 logger.remove()
 logger.add(sys.stderr, level="INFO")
+logger.add('logs.log', level="INFO")
 
 @dataclass
 class Sub:
@@ -357,7 +358,7 @@ class Sub:
                     infos = line.split(":", 1)
                     if infos[0] == "Title":
                         self.title = infos[1].strip().replace(":","-")
-                    ScriptInfo[infos[0].strip()] = int(infos[1].strip()) if infos[1].strip().isdigit() else infos[1].strip()
+                    ScriptInfo[infos[0].strip()] = Convert.to_good_type(infos[1].strip())
 
             return ScriptInfo
         except Exception as e:
@@ -414,28 +415,28 @@ class Sub:
                     logger.info(f"Ajout de la ligne \"{line}\"")
                     infos = line.split(":", 1)[1].strip().split(',', 22)
                     Styles[infos[0].strip()] = {
-                        "Fontname" :        infos[1].strip(),  
-                        "Fontsize" :        int(infos[2].strip()) if infos[2].strip().isdigit() else infos[2].strip(),
+                        "Fontname" :        Convert.to_good_type(infos[1].strip()),
+                        "Fontsize" :        Convert.to_good_type(infos[2].strip()),
                         "PrimaryColour" :   Convert.ASS_color_to_hex_color(infos[3].strip()),
                         "SecondaryColour" : Convert.ASS_color_to_hex_color(infos[4].strip()),
                         "OutlineColour" :   Convert.ASS_color_to_hex_color(infos[5].strip()),
                         "BackColour" :      Convert.ASS_color_to_hex_color(infos[6].strip()),
-                        "Bold" :            int(infos[7].strip()) if infos[7].strip().isdigit() else infos[7].strip(),
-                        "Italic" :          int(infos[8].strip()) if infos[8].strip().isdigit() else infos[8].strip(),
-                        "Underline" :       int(infos[9].strip()) if infos[9].strip().isdigit() else infos[9].strip(),
-                        "StrikeOut" :       int(infos[10].strip()) if infos[10].strip().isdigit() else infos[10].strip(),
-                        "ScaleX" :          int(infos[11].strip()) if infos[11].strip().isdigit() else infos[11].strip(),
-                        "ScaleY" :          int(infos[12].strip()) if infos[12].strip().isdigit() else infos[12].strip(),
-                        "Spacing" :         int(infos[13].strip()) if infos[13].strip().isdigit() else infos[13].strip(),
-                        "Angle" :           int(infos[14].strip()) if infos[14].strip().isdigit() else infos[14].strip(),
-                        "BorderStyle" :     int(infos[15].strip()) if infos[15].strip().isdigit() else infos[15].strip(),
-                        "Outline" :         int(infos[16].strip()) if infos[16].strip().isdigit() else infos[16].strip(),
-                        "Shadow" :          int(infos[17].strip()) if infos[17].strip().isdigit() else infos[17].strip(),
-                        "Alignment" :       int(infos[18].strip()) if infos[18].strip().isdigit() else infos[18].strip(),
-                        "MarginL" :         int(infos[19].strip()) if infos[19].strip().isdigit() else infos[19].strip(),
-                        "MarginR" :         int(infos[20].strip()) if infos[20].strip().isdigit() else infos[20].strip(),
-                        "MarginV" :         int(infos[21].strip()) if infos[21].strip().isdigit() else infos[21].strip(),
-                        "Encoding" :        int(infos[22].strip()) if infos[22].strip().isdigit() else infos[22].strip()
+                        "Bold" :            Convert.to_good_type(infos[7].strip()),
+                        "Italic" :          Convert.to_good_type(infos[8].strip()),
+                        "Underline" :       Convert.to_good_type(infos[9].strip()),
+                        "StrikeOut" :       Convert.to_good_type(infos[10].strip()),
+                        "ScaleX" :          Convert.to_good_type(infos[11].strip()),
+                        "ScaleY" :          Convert.to_good_type(infos[12].strip()),
+                        "Spacing" :         Convert.to_good_type(infos[13].strip()),
+                        "Angle" :           Convert.to_good_type(infos[14].strip()),
+                        "BorderStyle" :     Convert.to_good_type(infos[15].strip()),
+                        "Outline" :         Convert.to_good_type(infos[16].strip()),
+                        "Shadow" :          Convert.to_good_type(infos[17].strip()),
+                        "Alignment" :       Convert.to_good_type(infos[18].strip()),
+                        "MarginL" :         Convert.to_good_type(infos[19].strip()),
+                        "MarginR" :         Convert.to_good_type(infos[20].strip()),
+                        "MarginV" :         Convert.to_good_type(infos[21].strip()),
+                        "Encoding" :        Convert.to_good_type(infos[22].strip())
                     }
 
             return Styles
@@ -497,17 +498,17 @@ class Sub:
                     Tags = self.get_tags(Text)
 
                     Events[count] = {
-                        "Layer" :   int(infos[0].strip()) if infos[0].strip().isdigit() else infos[0].strip(),  
+                        "Layer" :   Convert.to_good_type(infos[0].strip()),
                         "Start" :   Convert.ASS_timecode_to_standard_timecode(infos[1].strip()),
                         "End" :     Convert.ASS_timecode_to_standard_timecode(infos[2].strip()),
-                        "Style" :   infos[3].strip(),
-                        "Name" :    infos[4].strip(),
-                        "MarginL" : int(infos[5].strip()) if infos[5].strip().isdigit() else infos[5].strip(),
-                        "MarginR" : int(infos[6].strip()) if infos[6].strip().isdigit() else infos[6].strip(),
-                        "MarginV" : int(infos[7].strip()) if infos[7].strip().isdigit() else infos[7].strip(),
-                        "Effect" :  infos[8].strip(),
+                        "Style" :   Convert.to_good_type(infos[3].strip()),
+                        "Name" :    Convert.to_good_type(infos[4].strip()),
+                        "MarginL" : Convert.to_good_type(infos[5].strip()),
+                        "MarginR" : Convert.to_good_type(infos[6].strip()),
+                        "MarginV" : Convert.to_good_type(infos[7].strip()),
+                        "Effect" :  Convert.to_good_type(infos[8].strip()),
                         "Text" :    re.sub(r'{.*?}', '', Text),
-                        "Tags" : Tags
+                        "Tags" :    Tags
                     }
 
                     count += 1
@@ -648,7 +649,6 @@ def main():
         SousTitre = Sub()
         for sub in SousTitre.get_subs():
             infos = SousTitre.get_sub_infos(sub)
-            json.dump(infos, open(f'{SousTitre.title}.json', 'w'), indent=4)
             Convert.to_SRT(infos["parts"], SousTitre.title, SousTitre.root)
             Convert.to_ASS(infos["parts"], SousTitre.title, '1920x1080', SousTitre.root)
 

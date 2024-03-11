@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 from loguru import logger
 
@@ -60,6 +61,33 @@ class Convert():
                 return f"&H{color[5:7]}{color[3:5]}{color[1:3]}{color[7:9]}"
             else:
                 return None
+
+        except Exception as e:
+            logger.error(f"Il y a eu une erreur inattendu lors de la conversion de la couleur {color} | {e}")
+
+    # * WORK : Fonctionne parfaitement
+    @staticmethod
+    def hex_RGBA_to_hex_RGB(color:str)->str:
+        """Convertit le formatage de couleur Hexadecimal RGBA vers Hexadecimal RGB
+
+        Args:
+            ```py
+            color (str): Couleur à convertir
+            ```
+
+        Returns:
+            ```py
+            str: Couleur convertit
+            ```
+        
+        #`RRGGBBAA` --> #`RRGGBB`
+        """
+        try:
+            logger.info(f"Convertit le code couleur \"{color}\"")
+            if len(color) == 9:
+                return color[:-2]
+            else:
+                return color
 
         except Exception as e:
             logger.error(f"Il y a eu une erreur inattendu lors de la conversion de la couleur {color} | {e}")
@@ -156,8 +184,53 @@ class Convert():
         except Exception as e:
             logger.error(f'Une erreur inattendu est survenu | {e}')
 
+    # * WORK : Fonctionne parfaitement
     @staticmethod
-    def get_tags_use(Events:dict, Styles:dict, i:int)->dict[str, str | int]:
+    def to_good_type(info:str|list[str]|dict[str, str | list[str]])->str|int|dict|list|float:
+        """Convertit un élément dans le typage qu'il doit être
+
+        Args:
+            ```py
+            info (str | list | dict): Élément à convertir
+            ```
+
+        Returns:
+            ```py
+            str|int|dict|list|float: Élément convertit
+            ```
+        """
+        try:
+            logger.info(f'L\'élément "{info}" en cours de traitement')
+            if isinstance(info, str):
+                logger.info(f'L\'élément "{info}" est un "String"')
+                if info.lstrip('-').isdigit():
+                    logger.info(f'L\'élément "{info}" est en réalité un "Int"')
+                    return int(info)
+                elif info.count('.') == 1 and all(c.isdigit() for c in info.replace('.', '', 1)):
+                    logger.info(f'L\'élément "{info}" est en réalité un "Float"')
+                    return float(info)
+                else:
+                    logger.info(f'L\'élément "{info}" est en réalité un "String"')
+                    return info
+            elif isinstance(info, list):
+                logger.info(f'L\'élément "{info}" est une "List"')
+                info_tmp = []
+                for i in info:
+                    info_tmp.append(Convert.convert_to_good_type(i))
+                return info_tmp
+            elif isinstance(info, dict):
+                logger.info(f'L\'élément "{info}" est un "Dict"')
+                for i in info.keys():
+                    info[i] = Convert.convert_to_good_type(info[i])
+                return info
+            else:
+                logger.info(f'L\'élément "{info}" est soit u "Int" ou un "Float" ou autre')
+                return info
+        except Exception as e:
+            logger.error(f"Une erreur inattendu est survenu | {e}")
+
+    @staticmethod
+    def get_tags_use(Events:dict, Styles:dict, i:int)->dict[str, str | int] | None:
             """Construit le tableau des balises en utilisations dans le dialogue en cours de traitement
 
             Args:
@@ -173,16 +246,16 @@ class Convert():
                 ```
             """
             try:
-                DEFAULT_VALUE_STYLE = {
+                DEFAULT_VALUE_STYLE:dict[str, list[str | int]] = {
                     'Fontname': ['fn', 'Arial'], # Arial by default
                     'Fontsize': ['fs', 48], # 48px by default
                     'Bold': ['b', 0], # None by default
                     'Italic': ['i', 0], # None by default
                     'Underline': ['u', 0], # None by default
-                    'PrimaryColour': ['c', '#FFFFFF'], # white by default
-                    'SecondaryColour': ['c2', '#FF0000'], # red by default
-                    'OutlineColour': ['c3', '#000000'], # dark by default
-                    'BackColour': ['c4', '#000000'], # dark by default
+                    'PrimaryColour': ['c', '#FFFFFF00'], # white by default
+                    'SecondaryColour': ['c2', '#FF000000'], # red by default
+                    'OutlineColour': ['c3', '#00000000'], # dark by default
+                    'BackColour': ['c4', '#00000000'], # dark by default
                     'StrikeOut': ['s', 0], # None by default
                     'ScaleX': ['fscx', 100], # 100% by default
                     'ScaleY': ['fscy', 100], # 100% by default
@@ -193,7 +266,7 @@ class Convert():
                     'Alignment': ['an', 2], # middle down by default
                     'Encoding': ['fe', 1] # 1 / default by default
                     }
-                DEFAULT_TAG = ['b', 'i', 'u', 'pos', 'fad', 'fade', 'move', 'org',
+                DEFAULT_TAG:list[str] = ['b', 'i', 'u', 'pos', 'fad', 'fade', 'move', 'org',
                                 'k', 'K', 'ko', 'kf', 'iclip', 'clip', 't', 'p',
                                 's', 'an', 'be', 'bord', 'blur', 'fax', 'fay', 'faz',
                                 'fs', 'fsc', 'fsp', 'fsv', 'fscx', 'fscy', 'frx', 'fry',
@@ -204,8 +277,29 @@ class Convert():
 
                 try:
                     if Style:
+                        logger.info(f'Le Style de la ligne "{i}" existe')
                         for tag in DEFAULT_VALUE_STYLE.keys():
-                            Tags[DEFAULT_VALUE_STYLE[tag][0]] = Style[tag] if Style.get(tag) and (Style[tag] > 0 or Style[tag] != '') else DEFAULT_VALUE_STYLE[tag][1]
+                            if Style.get(tag):
+                                if isinstance(Style[tag], int):
+                                    if Style[tag] >= 0:
+                                        logger.info(f'La balise "{tag}" est valide')
+                                        Tags[DEFAULT_VALUE_STYLE[tag][0]] = Style[tag]
+                                    else:
+                                        logger.info(f'La balise "{tag}" est invalide alors on prend la valeur par défaut')
+                                        Tags[DEFAULT_VALUE_STYLE[tag][0]] = DEFAULT_VALUE_STYLE[tag][1]
+                                elif isinstance(Style[tag], str):
+                                    if Style[tag] != '':
+                                        logger.info(f'La balise "{tag}" est valide')
+                                        Tags[DEFAULT_VALUE_STYLE[tag][0]] = Style[tag]
+                                    else:
+                                        logger.info(f'La balise "{tag}" est invalide alors on prend la valeur par défaut')
+                                        Tags[DEFAULT_VALUE_STYLE[tag][0]] = DEFAULT_VALUE_STYLE[tag][1]
+                                else:
+                                    logger.info(f'La balise "{tag}" est invalide alors on prend la valeur par défaut')
+                                    Tags[DEFAULT_VALUE_STYLE[tag][0]] = DEFAULT_VALUE_STYLE[tag][1]
+                            else:
+                                logger.info(f'La balise "{tag}" est invalide alors on prend la valeur par défaut')
+                                Tags[DEFAULT_VALUE_STYLE[tag][0]] = DEFAULT_VALUE_STYLE[tag][1]
 
                 except Exception as e:
                     logger.error(f'Une erreur inattendue est survenue | {e}')
@@ -213,13 +307,15 @@ class Convert():
                 try:
                     for tag in DEFAULT_TAG:
                         dialogue_tags = Events[i]['Tags']
-                        if (tag == 'pos' or tag == 'org') and tag in dialogue_tags:
-                            if isinstance(dialogue_tags[tag], dict):
+
+                        if dialogue_tags.get(tag):
+                            logger.info(f'La balise "{tag}" est présent dans les tags du dialogue')
+                            if dialogue_tags[tag] != 0 or dialogue_tags[tag] != '':
+                                logger.info(f'La balise "{tag}" est valide')
                                 Tags[tag] = dialogue_tags[tag]
-                            else:
+                            elif dialogue_tags[tag] == 0 or dialogue_tags[tag] == '':
+                                logger.info(f'La balise "{tag}" est invalide')
                                 Tags.pop(tag)
-                        elif tag in dialogue_tags:
-                            Tags[tag] = dialogue_tags[tag]
 
                 except Exception as e:
                     logger.error(f'Une erreur inattendue est survenue | {e}')
@@ -250,46 +346,59 @@ class Convert():
                 ```
             """
             try:
-                SRT_TAGS = ['b', 'u', 'i', 'c', 'pos', 'an']
+                SRT_TAGS = ['b', 'u', 'i', 'c']
                 tag = ''
                 Tags = Convert.get_tags_use(Events, Styles, i)
-                haveTag = False if Tags else True
+                haveTag = False
 
                 text = f"{i}\n"
                 text += f"{Convert.standard_timecode_to_SRT_timecode(Events[i]['Start'])} --> {Convert.standard_timecode_to_SRT_timecode(Events[i]['End'])} "
 
-                for tag in Tags.keys():
-                    if tag in SRT_TAGS:
-                        if not haveTag:
-                            if tag == 'c':
-                                dialogue = f'<font color="{Tags[tag]}">{Events[i]['Text']}</font>'
-                            elif tag == 'a':
-                                dialogue = f"<{tag}{Tags[tag]}>{Events[i]['Text']}</{tag}>"
-                            else:
-                                dialogue = f"<{tag}>{Events[i]['Text']}</{tag}>"
-                            haveTag = True
-
-                        else:
-                            if tag == 'c':
-                                dialogue = f'<font color="{Tags[tag]}">{dialogue}</font>'
-                            elif tag == 'a':
-                                dialogue = f"<{tag}{Tags[tag]}>{dialogue}</{tag}>"
-                            else:
-                                dialogue = f"<{tag}>{dialogue}</{tag}>"
+                if Tags:
+                    if 'pos' in Tags:
+                        pos = Tags['pos']
+                        text += f"X1:{pos['x']} X2:{pos['x']+50} Y1:{pos['y']} Y2:{pos['y']+50}\n"
+                    else:
+                        text += "\n"
                         
-                        if tag == 'pos':
-                            pos = Events[i]['Tags']['pos']
-                            text += f"X1:{pos['x']} X2:{pos['x']+50} Y1:{pos['y']} Y2:{pos['y']+50}\n"
-                        else:
-                            text += '\n'
+                    logger.info(f'Construction du sous-titre "{i}" avec les balises {Tags}')
+                    for tag in Tags.keys():
+                        if tag in SRT_TAGS:
+                            if not haveTag:
+                                try:
+                                    logger.info(f'haveTag "{haveTag}"')
+                                    if tag == 'c' and Tags[tag] != '':
+                                        logger.info(f'Balise "{tag}"')
+                                        dialogue = f'<font color="{Convert.hex_RGBA_to_hex_RGB(Tags[tag])}">{Events[i]['Text']}</font>'
+                                        haveTag = True
+                                    elif Tags[tag] != 0: 
+                                        logger.info(f'Balise "{tag}"')
+                                        dialogue = f"<{tag}>{Events[i]['Text']}</{tag}>"
+                                        haveTag = True
+                                except Exception as e:
+                                    logger.error(f'Une erreur inattendue est survenue lors de la construction du sous-titre "{i}" et la balise "{tag}" | {e}')
 
-                if not haveTag:
-                    dialogue = f'{Events[i]["Text"]}'
+                            else:
+                                try:
+                                    logger.info(f'haveTag "{haveTag}"')
+                                    if tag == 'c' and Tags[tag] != '':
+                                        logger.info(f'Balise "{tag}"')
+                                        dialogue = f'<font color="{Convert.hex_RGBA_to_hex_RGB(Tags[tag])}">{dialogue}</font>'
+                                    else:
+                                        if Tags[tag] != 0: 
+                                            logger.info(f'Balise "{tag}"')
+                                            dialogue = f"<{tag}>{dialogue}</{tag}>"
+                                except Exception as e:
+                                    logger.error(f'Une erreur inattendue est survenue lors de la construction du sous-titre "{i}" et la balise "{tag}" | {e}')
 
-                return text + dialogue + '\n\n'
+                    if not haveTag:
+                        return text + f'{Events[i]["Text"]}\n\n'
+                    else:
+                        return text + dialogue + '\n\n'
+                return text + '\n' + f'{Events[i]["Text"]}\n\n'
 
             except Exception as e:
-                logger.error(f'Une erreur inattendue est survenue lors de la construction du sous-titre {i} et la balise {tag} | {e}')
+                logger.error(f'Une erreur inattendue est survenue lors de la construction du sous-titre "{i}" et la balise "{tag}" | {e}')
 
         try:
             Styles = Parts['Styles']
@@ -301,6 +410,18 @@ class Convert():
 
         except Exception as e :
             logger.error(f'Une erreur inattendu est survenu | {e}')
+
+    def to_JSON(Parts:dict, title:str, dir:str = "./")->None:
+        """Convertit les infos du sous-titre chargé vers un format JSON
+
+        Args:
+            ```py
+            Parts (dict): Dictionnaire contenant les dialogues et les styles
+            dir (str): Répertoire de sortie
+            title (str): Nom du fichier de sortie
+            ```
+        """
+        json.dump(Parts, open(f'{dir}{title}.json', 'w'), indent=4)
 
     @staticmethod
     def to_ASS(Parts:dict, title:str, dim:str = "1280x720", dir:str = "./")->None:
