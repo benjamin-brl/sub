@@ -230,7 +230,7 @@ class Convert():
                 logger.error(f'Une erreur inattendue est survenue | {e}')
 
     @staticmethod
-    def to_SRT(Parts:dict, dir:str, title:str)->None:
+    def to_SRT(Parts:dict, title:str, dir:str = "./")->None:
         """Convertit les infos du sous-titre chargé vers un format SRT
 
         Args:
@@ -240,7 +240,7 @@ class Convert():
             title (str): Nom du fichier de sortie
             ```
         """
-        
+
         def builder() -> str:
             """Construits la chaîne de caractères pour la construction du dialogue
 
@@ -250,53 +250,38 @@ class Convert():
                 ```
             """
             try:
-                haveTag = False
+                SRT_TAGS = ['b', 'u', 'i', 'c', 'pos', 'an']
+                tag = ''
                 Tags = Convert.get_tags_use(Events, Styles, i)
+                haveTag = False if Tags else True
 
                 text = f"{i}\n"
                 text += f"{Convert.standard_timecode_to_SRT_timecode(Events[i]['Start'])} --> {Convert.standard_timecode_to_SRT_timecode(Events[i]['End'])} "
 
-                if 'pos' in Tags:
-                    pos = Events[i]['Tags']['pos']
-                    text += f"X1:{pos['x']} X2:{pos['x']+50} Y1:{pos['y']} Y2:{pos['y']+50}\n"
-                else:
-                    text += '\n'
-
-                for tag in [tag for tag in Tags if not isinstance(tag, dict)]:
-                    if not haveTag and tag not in ['pos', 'fad', 'fade', 'move',
-                                                   'org', 'k', 'K', 'ko',
-                                                   'kf', 'iclip', 'clip', 't',
-                                                   'p', 's', 'an', 'be',
-                                                   'bord', 'blur', 'fax', 'fay',
-                                                   'faz', 'fs', 'fsc', 'fsp',
-                                                   'fsv', 'fscx', 'fscy', 'frx',
-                                                   'fry', 'frz', 'fe', 'shad',
-                                                   'xbord', 'ybord', 'xshad', 'yshad',
-                                                   'fn']:
-                        dialogue = f"<{tag}>{Events[i]['Text']}</{tag}>"
-                        haveTag = True
-
-                    elif tag not in ['pos', 'fad', 'fade', 'move',
-                                    'org', 'k', 'K', 'ko',
-                                    'kf', 'iclip', 'clip', 't',
-                                    'p', 's', 'an', 'be',
-                                    'bord', 'blur', 'fax', 'fay',
-                                    'faz', 'fs', 'fsc', 'fsp',
-                                    'fsv', 'fscx', 'fscy', 'frx',
-                                    'fry', 'frz', 'fe', 'shad',
-                                    'xbord', 'ybord', 'xshad', 'yshad',
-                                    'fn']:
-                        dialogue = f"<{tag}>{dialogue}</{tag}>"
-
-                if any(isinstance(tag, dict) for tag in Tags):
-                    for tag in Tags:
-                        if isinstance(tag, dict) and 'c' in tag:
-                            if not haveTag:
-                                dialogue = f'<font color="{tag["c"]}">{Events[i]["Text"]}</font>'
-                                haveTag = True
-                                break
+                for tag in Tags.keys():
+                    if tag in SRT_TAGS:
+                        if not haveTag:
+                            if tag == 'c':
+                                dialogue = f'<font color="{Tags[tag]}">{Events[i]['Text']}</font>'
+                            elif tag == 'a':
+                                dialogue = f"<{tag}{Tags[tag]}>{Events[i]['Text']}</{tag}>"
                             else:
-                                dialogue = f'<font color="{tag["c"]}">{dialogue}</font>'
+                                dialogue = f"<{tag}>{Events[i]['Text']}</{tag}>"
+                            haveTag = True
+
+                        else:
+                            if tag == 'c':
+                                dialogue = f'<font color="{Tags[tag]}">{dialogue}</font>'
+                            elif tag == 'a':
+                                dialogue = f"<{tag}{Tags[tag]}>{dialogue}</{tag}>"
+                            else:
+                                dialogue = f"<{tag}>{dialogue}</{tag}>"
+                        
+                        if tag == 'pos':
+                            pos = Events[i]['Tags']['pos']
+                            text += f"X1:{pos['x']} X2:{pos['x']+50} Y1:{pos['y']} Y2:{pos['y']+50}\n"
+                        else:
+                            text += '\n'
 
                 if not haveTag:
                     dialogue = f'{Events[i]["Text"]}'
@@ -318,7 +303,7 @@ class Convert():
             logger.error(f'Une erreur inattendu est survenu | {e}')
 
     @staticmethod
-    def to_ASS(Parts:dict, dir:str, title:str, dim:str)->None:
+    def to_ASS(Parts:dict, title:str, dim:str = "1280x720", dir:str = "./")->None:
         """Convertit les infos du sous-titre chargé vers un format ASS
 
         Args:

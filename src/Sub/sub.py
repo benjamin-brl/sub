@@ -46,21 +46,23 @@ from tkinter import filedialog
 from langdetect import detect_langs, DetectorFactory
 
 logger.remove()
-# logger.add("logs.log", level="INFO", rotation="500Mb")
 logger.add(sys.stderr, level="INFO")
 
 @dataclass
 class Sub:
     """Classe représentant la gestion des sous-titres."""
 
-    subs:tuple[str] = ('')
-    """Variables des sous-titres chargés"""
+    subs:tuple[str] = None
+    """Variable des sous-titres chargés"""
     
     title:str = ''
-    """Variables des sous-titres chargés"""
+    """Variable du sous-titre chargé en cours"""
+    
+    root:str = ''
+    """Variable de la racine du sous-titre chargé en cours"""
 
     # * WORK : Fonctionne parfaitement
-    def get_subs(self, escape:bool = False)->tuple[str]:
+    def get_subs(self)->tuple[str]:
         """Récupère le fichier de sous-titre à traité
         
         Args:
@@ -91,22 +93,14 @@ class Sub:
                 ("DKS Subtitle Format", ("*.dks")),
                 ("Karaoke Lyrics LRC", ("*.lrc"))
             ]
-            if not escape:
-                subs = filedialog.askopenfilenames(title="Sélectionner un ou plusieurs sous-titre(s)", filetypes=ALL_FORMAT)
-                if subs != '':
-                    logger.info(f"L'utilisateur a chargé des sous-titres")
-                    self.subs = subs
-                    return subs
-                else:
-                    logger.info(f"L'utilisateur n'a pas chargé des sous-titres")
-                    self.get_subs(True)
+            subs = filedialog.askopenfilenames(title="Sélectionner un ou plusieurs sous-titre(s)", filetypes=ALL_FORMAT)
+            if subs:
+                logger.info(f"L'utilisateur a chargé des sous-titres")
+                self.subs = subs
+                return subs
             else:
-                if input("Voulez-vous rouvrir des fichiers ?\n'Entrée' pour oui, sinon tout autre caractère pour non\n> ") == "":
-                    logger.info(f"L'utilisateur retente sa chance")
-                    self.get_subs()
-                else:
-                    logger.info(f"L'utilisateur quite le script")
-                    sys.exit()
+                logger.info(f"L'utilisateur n'a pas chargé des sous-titres")
+                return None
 
         except FileNotFoundError as e:
             logger.error(f"Impossible de trouver le fichier | {e}")
@@ -315,6 +309,7 @@ class Sub:
                 Parts["Events"] = self.get_events(lines)
                 
                 self.title = Parts["Script Info"]["Title"].replace(":", "-")
+                self.root = f'{os.path.dirname(sub)}/'
             
             return Parts
 
@@ -546,8 +541,8 @@ class Sub:
         """
         REGEX_ENTER = r'\{([^}]+)\}'
         REGEX_ENTER_2 = r'(\\[^\\]*)'
-        REGEX_NUM = r'\\(p|s|u|i|b|k|K|an|be|bord|blur|fa[xyz]|fs|fsc|fsp|fsv|fscx|fscy|fr[xyz]|fe|shad|ko|kf|[xy]bord|[xy]shad)([0-9+\-.]+)'
-        REGEX_COLOR = r'\\(1c|2c|3c|4c|c|1a|2a|3a|4a|a|alpha)(\&.*?\&)'
+        REGEX_NUM = r'\\(a|p|s|u|i|b|k|K|an|be|bord|blur|fa[xyz]|fs|fsc|fsp|fsv|fscx|fscy|fr[xyz]|fe|shad|ko|kf|[xy]bord|[xy]shad)([0-9+\-.]+)'
+        REGEX_COLOR = r'\\(1c|2c|3c|4c|c|1a|2a|3a|4a|alpha)(\&.*?\&)'
         REGEX_SPECIAL = r'\\(clip|iclip|fad|fade|move|org|pos)(\(.*?\))'
         REGEX_T = r'\\(t)\((.*?)\)'
         REGEX_STRING = r'\\(fn)(.*)?\\'
@@ -597,7 +592,7 @@ class Sub:
 
                     for balise in balise_string:
                         Tags[balise[0]] = balise[1]
-                
+
             else:
                 logger.info(f"Essaie de retrouver les Tags suite à une balise t \"{dialogue}\"")
                 for group in re.findall(REGEX_ENTER_2, dialogue):
@@ -654,8 +649,8 @@ def main():
         for sub in SousTitre.get_subs():
             infos = SousTitre.get_sub_infos(sub)
             json.dump(infos, open(f'{SousTitre.title}.json', 'w'), indent=4)
-            Convert.to_SRT(infos["parts"], "./", SousTitre.title)
-            Convert.to_ASS(infos["parts"], "./", SousTitre.title, '1920x1080')
+            Convert.to_SRT(infos["parts"], SousTitre.title, SousTitre.root)
+            Convert.to_ASS(infos["parts"], SousTitre.title, '1920x1080', SousTitre.root)
 
     except TypeError as e:
         logger.error(f"Un sous-titre n'est pas dans le format attendu | {e}")
