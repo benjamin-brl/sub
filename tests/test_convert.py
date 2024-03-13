@@ -1,5 +1,5 @@
 import unittest
-from src.Converter.convert import Convert
+from Converter.convert import Convert
 
 class TestConvert(unittest.TestCase):
 
@@ -67,5 +67,42 @@ class TestConvert(unittest.TestCase):
 		self.assertEqual(Convert.to_good_type({'key':['list']}), {'key':['list']})
 		self.assertEqual(Convert.to_good_type({'key':['1']}), {'key':[1]})
 		self.assertEqual(Convert.to_good_type({'key':['-1']}), {'key':[-1]})
+  
+		# Hardcore challenge
+		TEST = [
+			{
+   				'key1' : "1",
+				'key2' : {
+					'list' : ['5.25', {
+						'argent' : '56€'
+					}]
+				}
+			},
+			{
+				'key1' : "1.g.fgh",
+				'key2' : {
+					'list' : ['5,25', {
+						'argent' : '5812147672121742115748'
+					}]
+				}
+			}]
+		TEST_OK = [
+			{
+   				'key1' : 1,
+				'key2' : {
+					'list' : [5.25, {
+						'argent' : '56€'
+					}]
+				}
+			},
+			{
+				'key1' : "1.g.fgh",
+				'key2' : {
+					'list' : ['5,25', {
+						'argent' : 5812147672121742115748
+					}]
+				}
+			}]
+		self.assertEqual(Convert.to_good_type(TEST), TEST_OK)
 
 unittest.main()

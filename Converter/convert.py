@@ -1,58 +1,59 @@
-import json
+import json, random, string
 from dataclasses import dataclass
 from loguru import logger
 
 @dataclass
 class Convert():
-    """Class de conversion des différents éléments vers des éléments "standard" et/ou vers des éléments spéciaux"""
+    """Class for converting various elements to "standard" and/or special elements"""
 
-    # * WORK : Fonctionne parfaitement
     @staticmethod
-    def ASS_color_to_hex_color(color:str)->str:
-        """Convertit le formatage de couleur ASS vers Hexadecimal
+    def ASS_color_to_hex_color(color:str)->str|None:
+        """Converts ASS color formatting to hexadecimal color format
 
         Args:
             ```py
-            color (str): Couleur à convertir
+            color (str): Color to convert
             ```
 
         Returns:
             ```py
-            str: Couleur convertit
+            str: Convert color
             ```
         
         &H`BBGGRR`& --> #`RRGGBB`
         """
         try:
-            logger.info(f"Convertit le code couleur \"{color}\"")
+            logger.info(f'Convert the following color "{color}"')
             if len(color) == 4:
                 return f"{color[2:4]}"
             elif len(color) == 9:
                 return f"#{color[6:8]}{color[4:6]}{color[2:4]}"
             elif len(color) == 10:
                 return f"#{color[6:8]}{color[4:6]}{color[2:4]}{color[8:10]}"
-        except Exception as e:
-            logger.error(f"Il y a eu une erreur inattendu lors de la conversion de la couleur {color} | {e}")
+            else:
+                None
 
-    # * WORK : Fonctionne parfaitement
+        except Exception as e:
+            logger.error(f'Unknown error when converting the "{color}" color | {e}')
+
     @staticmethod
-    def hex_color_to_ASS_color(color:str)->str:
-        """Convertit le formatage de couleur Hexadecimal vers ASS
+    def hex_color_to_ASS_color(color:str)->str|None:
+        """Converts hexadecimal color formatting to ASS format
 
         Args:
             ```py
-            color (str): Couleur à convertir
+            color (str): Color to convert
             ```
 
         Returns:
             ```py
-            str: Couleur convertit
+            str: Convert color
             ```
         
         #`RRGGBB` --> &H`BBGGRR`&
         """
         try:
-            logger.info(f"Convertit le code couleur \"{color}\"")
+            logger.info(f'Convert the following color "{color}"')
             if len(color) == 2:
                 return f"&H{color}"
             elif len(color) == 7:
@@ -63,114 +64,109 @@ class Convert():
                 return None
 
         except Exception as e:
-            logger.error(f"Il y a eu une erreur inattendu lors de la conversion de la couleur {color} | {e}")
+            logger.error(f'Unknown error when converting the "{color}" color | {e}')
 
-    # * WORK : Fonctionne parfaitement
     @staticmethod
-    def hex_RGBA_to_hex_RGB(color:str)->str:
-        """Convertit le formatage de couleur Hexadecimal RGBA vers Hexadecimal RGB
+    def hex_RGBA_to_hex_RGB(color:str)->str|None:
+        """Converts RGBA hexadecimal color formatting to RGB hexadecimal
 
         Args:
             ```py
-            color (str): Couleur à convertir
+            color (str): Color to convert
             ```
 
         Returns:
             ```py
-            str: Couleur convertit
+            str: Convert color
             ```
         
         #`RRGGBBAA` --> #`RRGGBB`
         """
         try:
-            logger.info(f"Convertit le code couleur \"{color}\"")
+            logger.info(f'Convert the following color "{color}"')
             if len(color) == 9:
                 return color[:-2]
             else:
-                return color
+                return None
 
         except Exception as e:
-            logger.error(f"Il y a eu une erreur inattendu lors de la conversion de la couleur {color} | {e}")
+            logger.error(f'Unknown error when converting the "{color}" color | {e}')
 
-    # * WORK : Fonctionne parfaitement
     @staticmethod
     def ASS_timecode_to_standard_timecode(timecode:str)->str:
-        """Convertit un timecode au format ASS vers un format standard
+        """Converts ASS format timecode to standard format
 
         Args:
             ```py
-            timecode (str): timecode d'entrée
+            timecode (str): Timecode to convert
             ```
 
         Returns:
             ```py
-            time: timecode au format time pour une harmonisation du format
+            time: Convert timecode
             ```
         """
         try:
-            logger.info(f"Convertit le timecode ASS \"{timecode}\" au format standard")
+            logger.info(f'Converts the following ASS timecode "{timecode}" to standard timecode format')
             h, m, s = timecode.split(':', 3)
             return f"{h.zfill(2)}:{m}:{s}0"
         except Exception as e:
-            logger.error(f"Il y a eu une erreur inattendu lors de la conversion du timecode {timecode} | {e}")
+            logger.error(f'Unknown error when converting the "{timecode}" timecode | {e}')
 
-    # * WORK : Fonctionne parfaitement
     @staticmethod
     def SRT_timecode_to_standard_timecode(timecode:str)->str:
-        """Convertit un timecode au format SRT vers un format standard
+        """Converts SRT format timecode to standard format
 
         Args:
             ```py
-            timecode (str): timecode d'entrée
+            timecode (str): Timecode to convert
             ```
 
         Returns:
             ```py
-            time: timecode au format standard pour une harmonisation du format
+            time: Convert timecode
             ```
         """
         try:
-            logger.info(f"Convertit le timecode SRT \"{timecode}\" au format standard")
+            logger.info(f'Converts the following SRT timecode "{timecode}" to standard timecode format')
             hms, ms = timecode.split(',', 1)
             return f"{hms}.{ms}"
         except Exception as e:
-            logger.error(f"Il y a eu une erreur inattendu lors de la conversion du timecode {timecode} | {e}")
+            logger.error(f'Unknown error when converting the "{timecode}" timecode | {e}')
 
-    # * WORK : Fonctionne parfaitement
     @staticmethod
     def standard_timecode_to_SRT_timecode(timecode:str)->str:
-        """Convertit le formatage de timecode ASS vers timecode SRT
+        """Converts standard timecode to SRT format
 
         Args:
             ```py
-            timecode (time): Timecode d'entrée au format time
+            timecode (time): Timecode to convert
             ```
 
         Returns:
             ```py
-            str: Timecode de sortie
+            str: Convert timecode
             ```
         """
         try:
-            logger.info(f"Convertit le timecode standard \"{timecode}\" au format SRT")
+            logger.info(f'Converts the following standard timecode "{timecode}" to SRT timecode format')
             hms, ms = timecode.split('.', 1)
             return f"{hms},{ms}"
         except Exception as e:
-            logger.error(f"Il y a eu une erreur inattendu lors de la conversion du timecode {timecode} | {e}")
+            logger.error(f'Unknown error when converting the "{timecode}" timecode | {e}')
 
-    # * WORK : Fonctionne parfaitement
     @staticmethod
     def standard_timecode_to_ASS_timecode(timecode:str)->str:
-        """Convertit le timecode "standard" en un timecode ASS
+        """Converts standard format timecode to ASS format
 
         Args:
             ```py
-            timecode (str): Timecode standard
+            timecode (str): Timecode to convert
             ```
 
         Returns:
             ```py
-            str: Timecode ASS
+            str: Convert timecode
             ```
         """
         try:
@@ -182,67 +178,69 @@ class Convert():
             else:
                 return f'{h}:{m}:{s}.{ms[:2]}'
         except Exception as e:
-            logger.error(f'Une erreur inattendu est survenu | {e}')
+            logger.error(f'Unknown error when converting the "{timecode}" timecode | {e}')
 
-    # * WORK : Fonctionne parfaitement
     @staticmethod
     def to_good_type(info:str|list[str]|dict[str, str | list[str]])->str|int|dict|list|float:
-        """Convertit un élément dans le typage qu'il doit être
+        """Convert an element into the typing it should be
 
         Args:
             ```py
-            info (str | list | dict): Élément à convertir
+            info (str | list | dict): Element to convert
             ```
 
         Returns:
             ```py
-            str|int|dict|list|float: Élément convertit
+            str|int|dict|list|float: Convert element
             ```
         """
         try:
-            logger.info(f'L\'élément "{info}" en cours de traitement')
+            logger.info(f'The "{info}" element being processed')
+
             if isinstance(info, str):
-                logger.info(f'L\'élément "{info}" est un "String"')
+                logger.info(f'The element "{info}" is a String')
                 if info.lstrip('-').isdigit():
-                    logger.info(f'L\'élément "{info}" est en réalité un "Int"')
+                    logger.info(f'The "{info}" element is actually an Int')
                     return int(info)
                 elif info.count('.') == 1 and all(c.isdigit() for c in info.replace('.', '', 1)):
-                    logger.info(f'L\'élément "{info}" est en réalité un "Float"')
+                    logger.info(f'The "{info}" element is actually a Float')
                     return float(info)
                 else:
-                    logger.info(f'L\'élément "{info}" est en réalité un "String"')
+                    logger.info(f'The element "{info}" is actually a String')
                     return info
+
             elif isinstance(info, list):
-                logger.info(f'L\'élément "{info}" est une "List"')
+                logger.info(f'The element "{info}" is a List')
                 info_tmp = []
                 for i in info:
-                    info_tmp.append(Convert.convert_to_good_type(i))
+                    info_tmp.append(Convert.to_good_type(i))
                 return info_tmp
+
             elif isinstance(info, dict):
-                logger.info(f'L\'élément "{info}" est un "Dict"')
+                logger.info(f'The element "{info}" is a Dict')
                 for i in info.keys():
-                    info[i] = Convert.convert_to_good_type(info[i])
+                    info[i] = Convert.to_good_type(info[i])
                 return info
             else:
-                logger.info(f'L\'élément "{info}" est soit u "Int" ou un "Float" ou autre')
+                logger.info(f'The "{info}" element is either an Int or a Float or other')
                 return info
         except Exception as e:
-            logger.error(f"Une erreur inattendu est survenu | {e}")
+            logger.error(f"Unknown error | {e}")
 
     @staticmethod
     def get_tags_use(Events:dict, Styles:dict, i:int)->dict[str, str | int] | None:
-            """Construit le tableau des balises en utilisations dans le dialogue en cours de traitement
+            """Builds the Dict of tags used in the dialog being processed
 
             Args:
                 ```py
-                Events (dict): Dictionnaire des dialogues
-                Styles (dict): Dictionnaire des styles
-                i (int): Numéro de ligne de dialogues
+                Events (dict): Dict of dialogues
+                Styles (dict): Dict of styles
+                i (int): Dialog line name
                 ```
 
             Returns:
                 ```py
-                list[str | dict[str, str]]: Tableau des balises
+                list[str | dict[str, str]]: Dict of tags
                 ```
             """
             try:
@@ -277,131 +275,218 @@ class Convert():
 
                 try:
                     if Style:
-                        logger.info(f'Le Style de la ligne "{i}" existe')
+                        logger.info(f'The "{i}" line style exists')
                         for tag in DEFAULT_VALUE_STYLE.keys():
                             if Style.get(tag):
                                 if isinstance(Style[tag], int):
                                     if Style[tag] >= 0:
-                                        logger.info(f'La balise "{tag}" est valide')
+                                        logger.info(f'The "{tag}" tag is valid')
                                         Tags[DEFAULT_VALUE_STYLE[tag][0]] = Style[tag]
                                     else:
-                                        logger.info(f'La balise "{tag}" est invalide alors on prend la valeur par défaut')
+                                        logger.info(f'The "{tag}" tag is invalid, so we use the default value')
                                         Tags[DEFAULT_VALUE_STYLE[tag][0]] = DEFAULT_VALUE_STYLE[tag][1]
                                 elif isinstance(Style[tag], str):
                                     if Style[tag] != '':
-                                        logger.info(f'La balise "{tag}" est valide')
+                                        logger.info(f'The "{tag}" tag is valid')
                                         Tags[DEFAULT_VALUE_STYLE[tag][0]] = Style[tag]
                                     else:
-                                        logger.info(f'La balise "{tag}" est invalide alors on prend la valeur par défaut')
+                                        logger.info(f'The "{tag}" tag is invalid, so we use the default value')
                                         Tags[DEFAULT_VALUE_STYLE[tag][0]] = DEFAULT_VALUE_STYLE[tag][1]
                                 else:
-                                    logger.info(f'La balise "{tag}" est invalide alors on prend la valeur par défaut')
+                                    logger.info(f'The "{tag}" tag is invalid, so we use the default value')
                                     Tags[DEFAULT_VALUE_STYLE[tag][0]] = DEFAULT_VALUE_STYLE[tag][1]
                             else:
-                                logger.info(f'La balise "{tag}" est invalide alors on prend la valeur par défaut')
+                                logger.info(f'The "{tag}" tag is invalid, so we use the default value')
                                 Tags[DEFAULT_VALUE_STYLE[tag][0]] = DEFAULT_VALUE_STYLE[tag][1]
 
                 except Exception as e:
-                    logger.error(f'Une erreur inattendue est survenue | {e}')
+                    logger.error(f'Unknown error | {e}')
 
                 try:
                     for tag in DEFAULT_TAG:
                         dialogue_tags = Events[i]['Tags']
 
                         if dialogue_tags.get(tag):
-                            logger.info(f'La balise "{tag}" est présent dans les tags du dialogue')
+                            logger.info(f'The "{tag}" tag is present in the dialog tags')
                             if dialogue_tags[tag] != 0 or dialogue_tags[tag] != '':
-                                logger.info(f'La balise "{tag}" est valide')
+                                logger.info(f'The "{tag}" tag is valid')
                                 Tags[tag] = dialogue_tags[tag]
                             elif dialogue_tags[tag] == 0 or dialogue_tags[tag] == '':
-                                logger.info(f'La balise "{tag}" est invalide')
+                                logger.info(f'The "{tag}" tag is invalid')
                                 Tags.pop(tag)
 
                 except Exception as e:
-                    logger.error(f'Une erreur inattendue est survenue | {e}')
+                    logger.error(f'Unknown error | {e}')
 
                 return Tags if Tags != {} else None
 
             except Exception as e:
-                logger.error(f'Une erreur inattendue est survenue | {e}')
+                logger.error(f'Unknown error | {e}')
 
+    # TODO : Poursuivre cette méthode
     @staticmethod
-    def to_SRT(Parts:dict, title:str, dir:str = "./")->None:
-        """Convertit les infos du sous-titre chargé vers un format SRT
+    def create_styles(Events:dict)->dict[str, str | int]:
+        """Create styles for tags common to all dialogs
 
         Args:
             ```py
-            Parts (dict): Dictionnaire contenant les dialogues et les styles
-            dir (str): Répertoire de sortie
-            title (str): Nom du fichier de sortie
+            Events (dict): Dictionary of events containing the tags
+            ```
+
+        Returns:
+            ```py
+            dict[str, str | int]: Dialogs styles
+            ```
+            ```json
+            {
+                "Exemple": {
+                    "Fontname": "Arial",
+		            "Fontsize": 48,
+		            "PrimaryColour": "#FFFF00FF",
+		            "SecondaryColour": "#000000FF",
+		            "OutlineColour": "#00000000",
+		            "BackColour": "#00000000",
+		            "Bold": 0,
+		            "Italic": "-1",
+		            "Underline": 0,
+                    ...
+                }
+            }
+            ```
+        """
+        
+        def create_style_name()->str:
+            """Generates a random style name
+
+            Returns:
+                ```py
+                str: Style name
+                ```
+            """
+            try:
+                logger.info(f'Create a new style name')
+                return f'Default-{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}'
+            except Exception as e:
+                logger.error(f'Unknown error | {e}')
+        
+        try:
+            
+            styles = {}
+            all_styles = {}
+            mutual_tags = {}
+            
+            for i in Events.keys():
+                logger.info(f'Get the tags')
+                Tags = Events[i].get('Tags')
+                
+                if Tags:
+                    for tag in Tags.keys():
+                        if mutual_tags.get(tag):
+                            logger.info(f'The "{tag}" tag is in common tags')
+                            if Tags[tag] != mutual_tags[tag]:
+                                style_name = create_style_name()
+                                styles[style_name] = mutual_tags
+                                Events[i]['Style'] = style_name
+                                logger.info(f'Void the common tags')
+                                mutual_tags = {}
+                            else:
+                                logger.info(f'The value of the "{tag}" tag is identical between the shared tag ("{mutual_tags[tag]}") and the retrieved tag ("{Tags[tag]}")')
+                                pass
+
+                        else:
+                            logger.info(f'The "{tag}" tag is not included in common tags.')
+                            logger.info(f'Adding the "{tag}" tag to common tags')
+                            mutual_tags[tag] = Tags[tag]
+                    
+                    if styles == {}:
+                        styles[create_style_name()] = mutual_tags
+                        return styles
+
+            return styles
+
+        except Exception as e:
+            logger.error(f'Unknown error | {e}')
+
+    @staticmethod
+    def to_SRT(Parts:dict, title:str, dir:str = "./")->None:
+        """Converts loaded subtitle info to SRT format
+
+        Args:
+            ```py
+            Parts (dict): Dict containing dialogues and styles
+            dir (str): Output dir
+            title (str): Output filename (without extension)
             ```
         """
 
         def builder() -> str:
-            """Construits la chaîne de caractères pour la construction du dialogue
+            """Builds the string for the dialog construction
 
             Returns:
                 ```py
-                str: Chaîne de caractère de sortie
+                str: Output string
                 ```
             """
             try:
                 SRT_TAGS = ['b', 'u', 'i', 'c']
+                Tags = Convert.get_tags_use(Events, Parts['Styles'], i)
                 tag = ''
-                Tags = Convert.get_tags_use(Events, Styles, i)
                 haveTag = False
 
                 text = f"{i}\n"
                 text += f"{Convert.standard_timecode_to_SRT_timecode(Events[i]['Start'])} --> {Convert.standard_timecode_to_SRT_timecode(Events[i]['End'])} "
-
+                
                 if Tags:
+                    logger.info(f'Some tags have been found on the line "{i}"')
                     if 'pos' in Tags:
+                        logger.info(f'"{tag}" tag have been found')
                         pos = Tags['pos']
                         text += f"X1:{pos['x']} X2:{pos['x']+50} Y1:{pos['y']} Y2:{pos['y']+50}\n"
                     else:
+                        logger.info(f'No "{tag}" tag have been')
                         text += "\n"
-                        
-                    logger.info(f'Construction du sous-titre "{i}" avec les balises {Tags}')
+
+                    logger.info(f'Building the line "{i}" with "{Tags}" tags')
                     for tag in Tags.keys():
                         if tag in SRT_TAGS:
+                            logger.info(f'"{tag}" tag have been found')
                             if not haveTag:
                                 try:
-                                    logger.info(f'haveTag "{haveTag}"')
+                                    logger.info(f'The text under construction have no tag yet')
                                     if tag == 'c' and Tags[tag] != '':
-                                        logger.info(f'Balise "{tag}"')
+                                        logger.info(f'Construct the "{tag}" tag')
                                         dialogue = f'<font color="{Convert.hex_RGBA_to_hex_RGB(Tags[tag])}">{Events[i]['Text']}</font>'
                                         haveTag = True
                                     elif Tags[tag] != 0: 
-                                        logger.info(f'Balise "{tag}"')
+                                        logger.info(f'Construct the "{tag}" tag')
                                         dialogue = f"<{tag}>{Events[i]['Text']}</{tag}>"
                                         haveTag = True
                                 except Exception as e:
-                                    logger.error(f'Une erreur inattendue est survenue lors de la construction du sous-titre "{i}" et la balise "{tag}" | {e}')
+                                    logger.error(f'Unknown error during the building of the line "{i}" and the "{tag}" tag | {e}')
 
                             else:
                                 try:
-                                    logger.info(f'haveTag "{haveTag}"')
+                                    logger.info(f'The text under construction have one or multiple tag(s)')
                                     if tag == 'c' and Tags[tag] != '':
-                                        logger.info(f'Balise "{tag}"')
+                                        logger.info(f'Construct the "{tag}" tag')
                                         dialogue = f'<font color="{Convert.hex_RGBA_to_hex_RGB(Tags[tag])}">{dialogue}</font>'
                                     else:
                                         if Tags[tag] != 0: 
-                                            logger.info(f'Balise "{tag}"')
+                                            logger.info(f'Construct the "{tag}" tag')
                                             dialogue = f"<{tag}>{dialogue}</{tag}>"
                                 except Exception as e:
-                                    logger.error(f'Une erreur inattendue est survenue lors de la construction du sous-titre "{i}" et la balise "{tag}" | {e}')
+                                    logger.error(f'Unknown error during the building of the line "{i}" and the "{tag}" tag | {e}')
 
                     if not haveTag:
-                        return text + f'{Events[i]["Text"]}\n\n'
+                        return text + Events[i]["Text"] + '\n\n'
                     else:
                         return text + dialogue + '\n\n'
-                return text + '\n' + f'{Events[i]["Text"]}\n\n'
+                return text + '\n' + Events[i]["Text"] + '\n\n'
 
             except Exception as e:
-                logger.error(f'Une erreur inattendue est survenue lors de la construction du sous-titre "{i}" et la balise "{tag}" | {e}')
+                logger.error(f'Unknown error during the building of the line "{i}" and the "{tag}" tag | {e}')
 
         try:
-            Styles = Parts['Styles']
             Events = Parts['Events']
 
             with open(f"{dir}{title}.srt", "w", encoding="utf-8") as f:
@@ -409,51 +494,56 @@ class Convert():
                     f.write(builder())
 
         except Exception as e :
-            logger.error(f'Une erreur inattendu est survenu | {e}')
+            logger.error(f'Unknown error | {e}')
 
+    @staticmethod
     def to_JSON(Parts:dict, title:str, dir:str = "./")->None:
-        """Convertit les infos du sous-titre chargé vers un format JSON
+        """Converts loaded subtitle info to SRT format
 
         Args:
             ```py
-            Parts (dict): Dictionnaire contenant les dialogues et les styles
-            dir (str): Répertoire de sortie
-            title (str): Nom du fichier de sortie
+            Parts (dict): Dict containing dialogues and styles
+            dir (str): Output dir
+            title (str): Output filename (without extension)
             ```
         """
         json.dump(Parts, open(f'{dir}{title}.json', 'w'), indent=4)
 
+    # ! FIXME : Marche pas
     @staticmethod
     def to_ASS(Parts:dict, title:str, dim:str = "1280x720", dir:str = "./")->None:
-        """Convertit les infos du sous-titre chargé vers un format ASS
+        """Converts loaded subtitle to ASS format (even if the file in the input is an ASS file)
 
         Args:
             ```py
-            Parts (dict): Dictionnaire contenant les dialogues et les styles
-            dir (str): Répertoire de sortie
-            title (str): Nom du fichier de sortie
-            dim (str): Dimension de la vidéo pour adaptation du script. Exemple : 1920x1080
+            Parts (dict): Dict containing dialogues and styles
+            dir (str): Output dir
+            title (str): Output filename (without extension)
+            dim (str): Video size for script adaptation. Example: 1920x1080
             ```
         """      
 
         def buildScriptInfo()->str:
             try:
+                logger.info(f'Create the "Script Info" section')
+                x, y = dim.split('x',1)
                 script_info = '[Script Info]\n'
                 script_info += f'Title: {title}\n'
                 script_info += 'ScriptType: v4.00+\n'
                 script_info += 'WrapStyle: 0\n'
                 script_info += 'ScaledBorderAndShadow: yes\n'
                 script_info += 'YCbCr Matrix: None\n'
-                script_info += f'PlayResX: {dim.split('x',1)[0]}\n'
-                script_info += f'PlayResY: {dim.split('x',1)[1]}\n\n'
+                script_info += f'PlayResX: {x}\n'
+                script_info += f'PlayResY: {y}\n\n'
 
                 return script_info
 
             except Exception as e:
-                logger.error(f'Une erreur inattendu est survenu | {e}')
+                logger.error(f'Unknown error | {e}')
                 
         def buildStyles()->str:
-            try:                
+            try:
+                logger.info(f'Create the "Styles" section')
                 text = '[V4+ Styles]\n'
                 text += 'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n'
 
@@ -473,7 +563,7 @@ class Convert():
 
                 return text + style + '\n'
             except Exception as e:
-                logger.error(f'Une erreur inattendu est survenu | {e}')
+                logger.error(f'Unknown error | {e}')
 
         def buildEvents()->str:
             
@@ -530,7 +620,7 @@ class Convert():
                             return ''
 
                         except Exception as e:
-                            logger.error(f'Une erreur inattendu est survenu | {e}')
+                            logger.error(f'Unknown error | {e}')
 
                     elif t:
                         try:
@@ -565,14 +655,15 @@ class Convert():
                                 return balise + ')'
 
                         except Exception as e:
-                            logger.error(f'Une erreur inattendu est survenu | {e}')
+                            logger.error(f'Unknown error | {e}')
 
                     return ''
 
                 except Exception as e:
-                    logger.error(f'Une erreur inattendu est survenu | {e}')
+                    logger.error(f'Unknown error | {e}')
             
             try:
+                logger.info(f'Create the "Events" section')
                 dialogues = ''
                 text = '[Events]\n'
                 text += 'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n'
@@ -595,7 +686,7 @@ class Convert():
                         
                 return text + dialogues
             except Exception as e:
-                logger.error(f'Une erreur inattendu est survenu | {e}')
+                logger.error(f'Unknown error | {e}')
 
         try:
             Styles = Parts['Styles']
@@ -606,4 +697,18 @@ class Convert():
                 f.write(buildStyles())
                 f.write(buildEvents())
         except Exception as e:
-            logger.error(f'Une erreur inattendu est survenu | {e}')
+            logger.error(f'Unknown error | {e}')
+
+
+def main():
+    from Sub.sub import Sub
+    SousTitre = Sub()
+    
+    parts = SousTitre.get_parts('C:/Users/Im4g1/Documents/Cours/Mini_Projet/SUBMODULE/doc/test.ass')
+    
+    Styles = Convert.create_styles(parts["Events"])
+    
+    json.dump(Styles, open('C:/Users/Im4g1/Documents/Cours/Mini_Projet/SUBMODULE/doc/test.json', 'w'),indent=4)
+
+if __name__ == "__main__":
+    main()

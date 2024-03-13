@@ -1,5 +1,5 @@
 import unittest
-from src.Sub.sub import Sub
+from Sub.sub import Sub
 
 Subtitle = Sub()
 

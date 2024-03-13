@@ -1,0 +1,9 @@
+SUBMODULE
+=========
+
+.. toctree::
+   :maxdepth: 4
+
+   main
+   setup
+   tests
