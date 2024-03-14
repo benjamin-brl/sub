@@ -1,3 +1,5 @@
+__pycache__
+_sources
 Converter/
 Sub/
 /_static/
@@ -7,5 +9,6 @@ conf.py
 make.bat
 Makefile
 *.rst
+*.log
 .buildinfo
 objects.inv
